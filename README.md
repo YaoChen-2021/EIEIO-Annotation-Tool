@@ -1,0 +1,4 @@
+Description. 
+The Electron Impact Excitation of Ions from Organics (EIEIO) annotation tool is an untargeted liquid chromatography-EIEIO tandem mass spectrometry (LC-EIEIO-MS/MS) data processing tool for in-depth analysis of lipid structure. This tool can accurately annotate the sum composition, sn-position, and C=C position of multiclass lipids such as lysophosphatidylcholine (LPC), phosphatidylcholine (PC), phosphatidylethanolamine (PE), sphingomyelin (SM), ceramide (Cer), diacylglycerol (DG), and triacylglycerol (TG). By summarizing the fragmentation principles of many lipid isomers in the positive ion EIEIO spectra, three index libraries were generated to realize the annotation of lipid structure. More details about this tool can be found in our article. 
+User guide. 
+This tool supports the mzML file format of the LC-MS raw data. The tool only need to run the summary.py to get the final output file after downloading this folder.
