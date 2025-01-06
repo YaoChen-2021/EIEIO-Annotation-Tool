@@ -7,7 +7,7 @@ def process_uncertain(original_sheet, index_data):
     precursor_mz = original_sheet['Precursor m/z'].iloc[0]
     difference = abs(index_data['TheoMz'] - precursor_mz)
     min_difference = difference.min()
-    if min_difference >= 0.03:
+    if min_difference >= 0.01:
         return None
     min_difference_index = difference.idxmin()
     matched_row = index_data.loc[min_difference_index]
@@ -23,7 +23,7 @@ def process_others(original_sheet, index_data):
         return None
     difference = abs(filtered_index_data['TheoMz'] - precursor_mz)
     min_difference = difference.min()
-    if min_difference >= 0.03:
+    if min_difference >= 0.01:
         return None
     min_difference_rows = filtered_index_data[difference == min_difference]
     if len(min_difference_rows) > 1:
