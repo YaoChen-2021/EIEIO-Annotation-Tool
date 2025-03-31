@@ -55,9 +55,9 @@ def process_single_file(input_file, index_data_uncertain, index_data_other, outp
                     else:
                         processed_sheets.append((sheet_name, processed_data))
             except Exception as e:
-                logging.error(f"Error processing sheet {sheet_name} in file {os.path.basename(input_file)}: {e}")
+                print(f"Error processing sheet {sheet_name} in file {os.path.basename(input_file)}: {e}")
         else:
-            logging.error(f"CLASS column missing in sheet {sheet_name} of file {os.path.basename(input_file)}")
+            print(f"CLASS column missing in sheet {sheet_name} of file {os.path.basename(input_file)}")
     if processed_sheets:
         output_file = os.path.join(output_folder, os.path.basename(input_file))
         wb = Workbook()
@@ -69,7 +69,7 @@ def process_single_file(input_file, index_data_uncertain, index_data_other, outp
             wb.remove(wb.worksheets[0])
         wb.save(output_file)
     else:
-        logging.error(f"No data to save for file: {os.path.basename(input_file)}")
+        print(f"No data to save for file: {os.path.basename(input_file)}")
 def process_original_data_optimized(input_folder, index_file, output_folder):
     index_data_uncertain = pd.read_excel(index_file, sheet_name='Uncertain')
     index_data_other = pd.read_excel(index_file, sheet_name='Others')
