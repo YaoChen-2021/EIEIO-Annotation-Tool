@@ -33,8 +33,10 @@ def process_excel_step2(df):
         return None
     columns_to_drop = ['sn_2_chain_b', 'sn_1_chain_d', 'sn_3_chain_f']
     df.drop(columns=[col for col in columns_to_drop if col in df.columns], inplace=True)
-    df.at[0, 'MS2mz'] = ','.join(map(str, df['MS2mz'].dropna().tolist()))
-    df.at[0, 'MS2i'] = ','.join(map(str, df['MS2i'].dropna().tolist()))
+    df.loc[:, 'MS2mz'] = df['MS2mz'].astype(str)
+    df.loc[:, 'MS2i'] = df['MS2i'].astype(str)
+    df.at[0, 'MS2mz'] = ','.join(df['MS2mz'].dropna().tolist())
+    df.at[0, 'MS2i'] = ','.join(df['MS2i'].dropna().tolist())
     df.loc[1:, ['MS2mz', 'MS2i']] = ''
     def create_C_C_diagnostic_ions(row):
         return ";".join(str(row[col]) for col in nl_columns if col in row and pd.notna(row[col]))
