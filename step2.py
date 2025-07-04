@@ -46,6 +46,7 @@ def process_excel(input_filename, output_filename):
                     df.loc[uncertain_index, 'CLASS'] = 'Uncertain'
                     df.to_excel(writer, sheet_name=sheet_name, index=False)
             except Exception as e:
+                print(f"Error processing sheet '{sheet_name}': {e}")
 def process_files_and_profile(input_folder, output_folder):
     for file_name in os.listdir(input_folder):
         if file_name.endswith(".xlsx"):
