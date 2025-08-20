@@ -1,62 +1,68 @@
 import os
 from pyopenms import MzMLFile, MSExperiment
-from openpyxl import Workbook
-def main(input_folder, split_folder):
+import numpy as np
+from dataclasses import dataclass
+
+
+@dataclass
+class MS2Spectrum:
+    def __init__(self, precursor_mz, precursor_rt, mz_array, intensity_array):
+        self.precursor_mz = precursor_mz
+        self.precursor_rt = precursor_rt
+        self.mz_array = mz_array
+        self.intensity_array = intensity_array
+        self.lipid_class = []
+        self.sub_class = []
+        self.lipid_id = []
+        self.lipid_formula = []
+        self.lipid_mass = []
+        self.adduct = []
+        self.c_number = []
+        self.db_number = []
+
+    def __repr__(self):
+        return f"MS2Spectrum(mz={self.precursor_mz}, rt={self.precursor_rt}, peaks={len(self.mz_array)})"
+
+
+def step1(input_folder: str):
+    dataset = {}  # key: filename, value: list of MS2Spectrum
+
     for file in os.listdir(input_folder):
         if file.endswith(".mzML"):
             file_path = os.path.join(input_folder, file)
             experiment = MSExperiment()
             MzMLFile().load(file_path, experiment)
-            workbook = Workbook()
-            extract_and_process(experiment, workbook)
-            if "Sheet" in workbook.sheetnames:
-                std = workbook["Sheet"]
-                workbook.remove(std)
-            split_workbook(workbook, os.path.join(split_folder, f"output_{file[:-5]}"))
-def extract_and_process(experiment, workbook):
-    j = 0
+
+            ms2_spectra = extract_ms2_spectra(experiment)
+            dataset[file] = ms2_spectra
+
+            print(f"Loaded {len(ms2_spectra)} MS2 spectra from {file}")
+    return dataset
+
+
+def extract_ms2_spectra(experiment: MSExperiment) -> list[MS2Spectrum]:
+    ms2_list = []
     for scan in experiment:
         if scan.getMSLevel() == 2:
             precursor = scan.getPrecursors()[0] if scan.getPrecursors() else None
             if precursor:
-                precursor_mz = round(precursor.getMZ(), 4)
-                precursor_rt = round(scan.getRT(), 4)
-                sheet = workbook.create_sheet(title=f"mz_{j}_rt_{j}")
-                sheet.append(["Precursor m/z", "Precursor RT", "MS2mz", "MS2i"])
-                sheet.append([precursor_mz, precursor_rt, "", ""])
-                for mz, i in zip(*scan.get_peaks()):
-                    if i > 0:
-                        mz = round(mz, 4)
-                        i = round(i, 4)
-                        sheet.append(["", "", mz, i])
-                j += 1
-def split_workbook(workbook, output_prefix):
-    sheet_names = workbook.sheetnames
-    batch_size = 2000
-    current_workbook_index = 1
-    current_sheet_count = 0
-    output_workbook = Workbook()
-    output_workbook.remove(output_workbook.active)
-    for sheet_name in sheet_names:
-        sheet = workbook[sheet_name]
-        output_sheet = output_workbook.create_sheet(title=sheet_name)
-        copy_sheet(sheet, output_sheet)
-        current_sheet_count += 1
-        if current_sheet_count == batch_size:
-            output_file = f"{output_prefix}_{current_workbook_index}.xlsx"
-            output_workbook.save(output_file)
-            output_workbook = Workbook()
-            output_workbook.remove(output_workbook.active)
-            current_workbook_index += 1
-            current_sheet_count = 0
-    if current_sheet_count > 0:
-        output_file = f"{output_prefix}_{current_workbook_index}.xlsx"
-        output_workbook.save(output_file)
-def copy_sheet(source_sheet, target_sheet):
-    for row in source_sheet.iter_rows(values_only=True):
-        target_sheet.append(row)
+                precursor_mz = np.float32(precursor.getMZ())
+                precursor_rt = np.float32(scan.getRT())
+                mzs, intensities = scan.get_peaks()
+                # Filter and convert to float32 arrays
+                mzs = np.asarray(mzs, dtype=np.float32)
+                intensities = np.asarray(intensities, dtype=np.float32)
+
+                mask = intensities > 0
+                mzs_filtered = mzs[mask]
+                intensities_filtered = intensities[mask]
+
+                ms2 = MS2Spectrum(precursor_mz, precursor_rt, mzs_filtered, intensities_filtered)
+                ms2_list.append(ms2)
+    return ms2_list
+
+
 
 if __name__ == "__main__":
     input_folder = "input-mzml"
-    split_folder = "output-step1"
-    main(input_folder, split_folder)
+    dataset = step1(input_folder)
