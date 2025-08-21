@@ -22,7 +22,6 @@ def step2(ms2_dataset: dict):
                 ms2_spectrum.lipid_class.append('SM')
             elif has_142 and has_182:
                 ms2_spectrum.lipid_class.append('PE')
-                # 没有被判定为任何类别的就是Others吗？
 
 
 if __name__ == '__main__':
